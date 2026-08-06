@@ -15,7 +15,7 @@ Supervised by Prof. Haseeb Azmat.
 ## Table of contents
 
 1. [Zero-cost guarantee](#zero-cost-guarantee)
-2. [Quick start](#quick-start)
+2. [Quick start](#quick-start) · [Offline install](#fully-offline-installation) · [Known limitations](#known-limitations)
 3. [Demo accounts](#demo-accounts)
 4. [Running the tests](#running-the-tests)
 5. [Docker](#docker)
@@ -64,7 +64,26 @@ no cost. Nothing in the codebase depends on either.
 
 ## Quick start
 
-Requires Python 3.11 or newer and Git. Nothing else.
+### Easiest: one-click launcher
+
+**Windows** — double-click **`run.bat`**.
+**macOS / Linux** — `chmod +x run.sh && ./run.sh`.
+
+It finds Python, creates the virtual environment, installs the dependencies,
+creates and seeds the database, starts the server and opens your browser. On
+later runs it skips whatever is already done and starts in a couple of seconds.
+
+Two things it cannot do for you:
+
+* **Python 3.11+ must already be installed.** If it is missing the script says
+  so and links to the free download. On Windows, tick *"Add Python to PATH"* in
+  the installer.
+* **The first run needs internet**, once, to download the dependencies. See
+  [Fully offline installation](#fully-offline-installation) to remove even that.
+
+### Manual setup
+
+Requires Python 3.11 or newer. Nothing else.
 
 ```bash
 # 1. Get the code and enter it
@@ -98,6 +117,38 @@ Open <http://127.0.0.1:8000/> and sign in with any account below.
 
 In development, emails are printed to the terminal running `runserver` — no
 SMTP server or account is needed.
+
+### Fully offline installation
+
+To run on a machine that has **no internet at all** (e.g. a lab PC on exam day),
+prepare the wheels once on a connected machine:
+
+```bash
+pip download -r requirements.txt -d vendor
+```
+
+Copy the whole project folder — `vendor/` included — to the offline machine and
+run `run.bat` / `run.sh` as usual. The launcher detects `vendor/` and installs
+with `--no-index`, so nothing is fetched from the network.
+
+`vendor/` is deliberately **not** committed: the wheels are platform-specific
+(a Windows wheel will not install on Linux) and add roughly 40 MB, so they are
+generated on the machine family you intend to deploy to.
+
+### Verified portability
+
+The steps above were tested by extracting a fresh copy of the repository into an
+empty directory, with no `.env`, no database and no virtual environment:
+
+| Check | Result |
+|---|---|
+| Boots with **no `.env` file** (all settings fall back to safe defaults) | `check` reports no issues |
+| Runs on **Python 3.14** as well as 3.13 | Django 5.2.17 imports and runs |
+| `migrate` from empty | 31 migrations applied |
+| `seed_demo_data` from empty | 3 departments, 8 users, 15 complaints |
+| Full test suite in the clean copy | 284 passed |
+| Server + real browser login | 200, reached the dashboard |
+| `run.bat` from a folder with nothing but source | venv + deps + DB + server, unattended |
 
 ---
 
@@ -440,6 +491,51 @@ it is not part of `manage.py test`. Free tools that can produce those numbers
 are Apache Bench (`ab`) or Locust (both open source). The design work backing
 these targets — indexing, `select_related`, pagination and off-thread email — is
 in place and described in the NFR table above.
+
+---
+
+## Known limitations
+
+Everything in the requirements is implemented and working. These are the honest
+edges of the current build — none of them block the demo or the defence, but you
+should know about them rather than discover them.
+
+1. **No self-service password reset.** The login screen says *"Forgot password?
+   Contact the administrator"* and the Principal resets it from
+   **Users → Edit → Password**. A self-service email reset needs a live SMTP
+   account configured, which the zero-cost/offline constraint makes optional.
+   Django's built-in reset views can be wired to `accounts/urls.py` in a few
+   lines once real SMTP credentials exist.
+
+2. **Docker was never built or run.** The Dockerfile, compose file and
+   entrypoint are written and statically validated (YAML parses, `sh -n` clean,
+   exec bit set, and the `collectstatic` step the build performs is verified to
+   succeed under production settings). Docker itself is not installed on the
+   development machine, so `docker compose up --build` is unverified.
+
+3. **Load testing (PT-01, PT-02) is not automated.** Measuring "<2 s response"
+   and "200 concurrent users" needs a deployed instance and a load generator —
+   a measurement activity, not a unit test. Use the free `ab` or Locust.
+
+4. **Notification delivery has no retry queue.** Email is sent on a daemon
+   thread; failures are recorded as `FAILED` in the Notification table and in
+   the audit log, but nothing retries them automatically. A durable queue would
+   mean adding Celery + Redis — still free, but heavier than this project needs.
+   The admin can see every failure under **Activity Log**.
+
+5. **Assignment targets are HODs and the Principal.** The SRS defines exactly
+   three roles, so there is no separate "staff" account type to assign work to.
+   Complaints are assigned within the owning department's HOD(s) plus the
+   Principal. Adding a fourth role would be a schema change.
+
+6. **Uploaded files are not virus-scanned.** They are validated by extension,
+   declared content type and magic number, stored outside the web root under
+   randomised names, and served only through a permission-checked view — but no
+   antivirus engine inspects them. ClamAV is the free option if that matters.
+
+7. **SQLite is the default database.** Excellent for a demo and fine for a
+   single college department, but it serialises writes. For heavy concurrent
+   use switch `DB_ENGINE=mysql` (already supported and free).
 
 ---
 

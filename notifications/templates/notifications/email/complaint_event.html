@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <body style="font-family:Arial,Helvetica,sans-serif;color:#212529;background:#f5f6f8;padding:24px;">
+    <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #e3e6ea;">
+      <div style="background:#7b1030;color:#ffffff;padding:16px 24px;">
+        <h1 style="margin:0;font-size:18px;">{{ portal_name }}</h1>
+        <p style="margin:4px 0 0;font-size:13px;opacity:.85;">{{ institution }}</p>
+      </div>
+      <div style="padding:24px;">
+        <p>Dear {{ recipient_name }},</p>
+        <p>
+          {% if event == "submitted" %}Your complaint has been received and recorded.
+          {% elif event == "assigned" %}Your complaint has been assigned for review.
+          {% elif event == "status_changed" %}The status of your complaint has changed{% if previous_status %} from <strong>{{ previous_status }}</strong>{% endif %} to <strong>{{ status_label }}</strong>.
+          {% elif event == "remark" %}A new update has been added to your complaint.
+          {% else %}There is an update on your complaint.{% endif %}
+        </p>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0;">
+          <tr><td style="padding:6px 0;color:#6c757d;width:130px;">Reference</td><td style="padding:6px 0;"><strong>{{ complaint.reference }}</strong></td></tr>
+          <tr><td style="padding:6px 0;color:#6c757d;">Subject</td><td style="padding:6px 0;">{{ complaint.subject }}</td></tr>
+          <tr><td style="padding:6px 0;color:#6c757d;">Category</td><td style="padding:6px 0;">{{ complaint.get_category_display }}</td></tr>
+          <tr><td style="padding:6px 0;color:#6c757d;">Department</td><td style="padding:6px 0;">{{ complaint.department.name }}</td></tr>
+          <tr><td style="padding:6px 0;color:#6c757d;">Status</td><td style="padding:6px 0;">{{ status_label }}</td></tr>
+          <tr><td style="padding:6px 0;color:#6c757d;">Submitted</td><td style="padding:6px 0;">{{ complaint.created_at|date:"d M Y, H:i" }}</td></tr>
+        </table>
+        {% if remark %}
+          <div style="background:#f8f9fa;border-left:3px solid #7b1030;padding:12px 16px;font-size:14px;">{{ remark }}</div>
+        {% endif %}
+        <p style="font-size:14px;">Sign in to the portal to track this complaint.</p>
+        <p style="font-size:14px;margin-bottom:0;">Regards,<br />{{ institution }}</p>
+      </div>
+      <div style="background:#f8f9fa;padding:12px 24px;font-size:12px;color:#6c757d;">
+        This is an automated message. Please do not reply to this email.
+      </div>
+    </div>
+  </body>
+</html>

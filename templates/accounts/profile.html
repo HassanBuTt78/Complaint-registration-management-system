@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}My profile{% endblock %}
+
+{% block content %}
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="panel">
+        <div class="panel-heading">Account details</div>
+        <div class="panel-body">
+          <dl class="row mb-0 small">
+            <dt class="col-5 text-muted fw-normal">Full name</dt>
+            <dd class="col-7">{{ user.get_full_name }}</dd>
+            <dt class="col-5 text-muted fw-normal">Email</dt>
+            <dd class="col-7">{{ user.email }}</dd>
+            <dt class="col-5 text-muted fw-normal">ID</dt>
+            <dd class="col-7">{{ user.identifier|default:"-" }}</dd>
+            <dt class="col-5 text-muted fw-normal">Role</dt>
+            <dd class="col-7">{{ user.get_role_display }}</dd>
+            <dt class="col-5 text-muted fw-normal">Department</dt>
+            <dd class="col-7">{{ user.department.name|default:"All departments" }}</dd>
+            <dt class="col-5 text-muted fw-normal">Joined</dt>
+            <dd class="col-7">{{ user.date_joined|date:"d M Y" }}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <div class="panel">
+        <div class="panel-heading">Update profile</div>
+        <div class="panel-body">
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {% include "partials/field.html" with field=form.full_name %}
+            {% include "partials/field.html" with field=form.phone %}
+            <button type="submit" class="btn btn-maroon">Save changes</button>
+          </form>
+          <p class="helptext mt-3 mb-0">
+            Your email, ID, role and department are managed by the administrator.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

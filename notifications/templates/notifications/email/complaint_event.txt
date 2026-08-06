@@ -1,0 +1,21 @@
+Dear {{ recipient_name }},
+
+{% if event == "submitted" %}Your complaint has been received and recorded.{% elif event == "assigned" %}Your complaint has been assigned for review.{% elif event == "status_changed" %}The status of your complaint has changed{% if previous_status %} from {{ previous_status }}{% endif %} to {{ status_label }}.{% elif event == "remark" %}A new update has been added to your complaint.{% else %}There is an update on your complaint.{% endif %}
+
+Reference : {{ complaint.reference }}
+Subject   : {{ complaint.subject }}
+Category  : {{ complaint.get_category_display }}
+Department: {{ complaint.department.name }}
+Status    : {{ status_label }}
+Submitted : {{ complaint.created_at|date:"d M Y, H:i" }}
+{% if remark %}
+Update:
+{{ remark }}
+{% endif %}
+You can track this complaint by signing in to the {{ portal_name }}.
+
+Regards,
+{{ institution }}
+
+--
+This is an automated message. Please do not reply to this email.

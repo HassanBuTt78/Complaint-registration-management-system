@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+  <div class="mb-3">
+    <h1 class="h4 mb-1">Complaint reports</h1>
+    <p class="text-muted small mb-0">
+      Filter the records you need, then export them as CSV or PDF.
+      {% if is_hod %}Reports are automatically limited to your department.{% endif %}
+    </p>
+  </div>
+
+  <div class="panel mb-4">
+    <div class="panel-body">
+      {% include "partials/filter_bar.html" with show_export=True %}
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-lg-4">
+      <div class="stat-card">
+        <div class="stat-value">{{ summary.total }}</div>
+        <div class="stat-label">Records in this report</div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="panel h-100">
+        <div class="panel-heading py-2">By status</div>
+        <div class="panel-body py-2">
+          <ul class="list-unstyled small mb-0">
+            {% for status, count in summary.by_status.items %}
+              <li class="d-flex justify-content-between"><span>{{ status }}</span><strong>{{ count }}</strong></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="panel h-100">
+        <div class="panel-heading py-2">By category</div>
+        <div class="panel-body py-2">
+          <ul class="list-unstyled small mb-0">
+            {% for category, count in summary.by_category.items %}
+              <li class="d-flex justify-content-between"><span>{{ category }}</span><strong>{{ count }}</strong></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-heading">
+      <span>Preview</span>
+      <span class="text-muted small">Exports include every matching record (max 5000).</span>
+    </div>
+    {% include "partials/complaint_table.html" with show_department=True show_complainant=True empty_message="No complaints match the current filters." %}
+  </div>
+{% endblock %}

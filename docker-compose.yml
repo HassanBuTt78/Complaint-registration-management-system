@@ -1,0 +1,63 @@
+# ---------------------------------------------------------------------------
+# Online Complaint Registration & Management System
+#
+# Default profile runs the web app on SQLite - a single command, no database
+# server, no cost. Start the optional MySQL 8 Community Edition service with:
+#
+#   docker compose --profile mysql up --build
+#
+# and set DB_ENGINE=mysql, DB_HOST=db in your .env.
+# ---------------------------------------------------------------------------
+
+services:
+  web:
+    build: .
+    image: ocr-portal:latest
+    container_name: ocr-portal-web
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+      # The container terminates plain HTTP on :8000; put a TLS-terminating
+      # proxy in front in production and flip this back to True.
+      SECURE_SSL_REDIRECT: "False"
+      SEED_DEMO_DATA: "${SEED_DEMO_DATA:-0}"
+    volumes:
+      - media:/app/media
+      - logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/accounts/login/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  db:
+    # MySQL Community Edition - free and open source (GPLv2).
+    image: mysql:8.4
+    container_name: ocr-portal-db
+    profiles: ["mysql"]
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: "${DB_NAME:-complaint_system}"
+      MYSQL_USER: "${DB_USER:-complaint_user}"
+      MYSQL_PASSWORD: "${DB_PASSWORD:-change-me}"
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-change-me-too}"
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  media:
+  logs:
+  mysql-data:

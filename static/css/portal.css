@@ -1,0 +1,329 @@
+/*
+ * OCR Portal theme.
+ * College colours: maroon primary, warm neutral surfaces, high contrast text.
+ */
+
+:root {
+  --portal-maroon: #7b1030;
+  --portal-maroon-dark: #5d0b24;
+  --portal-green: #1f7a4d;
+  --portal-surface: #f4f5f7;
+  --portal-border: #dfe3e8;
+  --portal-muted: #5a6169;
+}
+
+body {
+  background: var(--portal-surface);
+  color: #1f2328;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+/* ---------------------------------------------------------------- navbar */
+.portal-navbar {
+  background: var(--portal-maroon);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.portal-navbar .navbar-brand,
+.portal-navbar .nav-link {
+  color: rgba(255, 255, 255, 0.88);
+  font-weight: 500;
+}
+
+.portal-navbar .nav-link:hover,
+.portal-navbar .nav-link:focus {
+  color: #fff;
+}
+
+.portal-navbar .nav-link.active {
+  color: #fff;
+  border-bottom: 2px solid #fff;
+}
+
+.portal-navbar .navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.portal-navbar .navbar-toggler-icon {
+  filter: invert(1) grayscale(1) brightness(2);
+}
+
+.navbar-role {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--portal-maroon);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* ---------------------------------------------------------------- footer */
+.portal-footer {
+  flex-shrink: 0;
+  background: #fff;
+  border-top: 1px solid var(--portal-border);
+  color: var(--portal-muted);
+  font-size: 0.82rem;
+  padding: 14px 0;
+}
+
+/* ------------------------------------------------------------------ auth */
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 16px;
+  background: linear-gradient(160deg, #7b1030 0%, #3d0817 100%);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 460px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid var(--portal-border);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.24);
+  padding: 30px 32px;
+}
+
+.auth-card--wide {
+  max-width: 720px;
+}
+
+.auth-title {
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 1.02rem;
+  color: var(--portal-maroon);
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+.auth-subtitle {
+  text-align: center;
+  color: var(--portal-muted);
+  font-size: 0.9rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+
+/* ----------------------------------------------------------------- cards */
+.stat-card {
+  background: #fff;
+  border: 1px solid var(--portal-border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  height: 100%;
+}
+
+.stat-card .stat-value {
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--portal-maroon);
+}
+
+.stat-card .stat-label {
+  color: var(--portal-muted);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.panel {
+  background: #fff;
+  border: 1px solid var(--portal-border);
+  border-radius: 10px;
+}
+
+.panel-heading {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--portal-border);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.panel-body {
+  padding: 18px;
+}
+
+/* ---------------------------------------------------------------- tables */
+.table thead th {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--portal-muted);
+  border-bottom-width: 1px;
+  white-space: nowrap;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.reference-cell {
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+/* -------------------------------------------------------------- timeline */
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 22px;
+  border-left: 2px solid var(--portal-border);
+}
+
+.timeline-item {
+  position: relative;
+  padding: 0 0 20px 18px;
+}
+
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.timeline-item::before {
+  content: "";
+  position: absolute;
+  left: -29px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--portal-maroon);
+}
+
+.timeline-item.is-status::before {
+  background: var(--portal-maroon);
+}
+
+.timeline-item.is-remark::before {
+  border-color: var(--portal-green);
+}
+
+.timeline-title {
+  font-weight: 600;
+  font-size: 0.94rem;
+}
+
+.timeline-meta {
+  color: var(--portal-muted);
+  font-size: 0.79rem;
+}
+
+.timeline-body {
+  font-size: 0.9rem;
+  margin-top: 4px;
+  white-space: pre-wrap;
+}
+
+/* ---------------------------------------------------------------- misc */
+.anon-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #fdf1d6;
+  border: 1px solid #f0d18a;
+  color: #7a5406;
+  border-radius: 999px;
+  padding: 1px 10px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-maroon {
+  background: var(--portal-maroon);
+  border-color: var(--portal-maroon);
+  color: #fff;
+}
+
+.btn-maroon:hover,
+.btn-maroon:focus {
+  background: var(--portal-maroon-dark);
+  border-color: var(--portal-maroon-dark);
+  color: #fff;
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 0.3rem;
+}
+
+.helptext {
+  display: block;
+  color: var(--portal-muted);
+  font-size: 0.79rem;
+  margin-top: 4px;
+}
+
+.errorlist {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+  color: #b02a37;
+  font-size: 0.82rem;
+}
+
+.suggestion-hint {
+  font-size: 0.82rem;
+  color: var(--portal-green);
+  margin-top: 5px;
+  min-height: 1.2em;
+}
+
+.chart-box {
+  position: relative;
+  height: 300px;
+}
+
+.error-shell {
+  min-height: 72vh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 40px 16px;
+}
+
+.error-code {
+  font-size: 5rem;
+  font-weight: 800;
+  color: var(--portal-maroon);
+  line-height: 1;
+}
+
+@media (max-width: 575.98px) {
+  .stat-card .stat-value {
+    font-size: 1.5rem;
+  }
+}

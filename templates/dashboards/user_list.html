@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}User management{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1">User management</h1>
+      <p class="text-muted small mb-0">Create staff accounts, assign roles and departments, deactivate access.</p>
+    </div>
+    <a class="btn btn-maroon" href="{% url 'dashboards:user_create' %}">Add user</a>
+  </div>
+
+  <div class="panel mb-4">
+    <div class="panel-body">
+      <form method="get" class="row g-2 align-items-end">
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="q">Search</label>
+          <input type="search" class="form-control" id="q" name="q" value="{{ q }}"
+                 placeholder="Name, email or ID" />
+        </div>
+        <div class="col-8 col-md-4">
+          <label class="form-label" for="role">Role</label>
+          <select class="form-select" id="role" name="role">
+            <option value="">All roles</option>
+            {% for value, label in roles %}
+              <option value="{{ value }}"{% if role == value %} selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-4 col-md-2 d-grid">
+          <button type="submit" class="btn btn-outline-secondary">Filter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-heading">
+      <span>Accounts</span>
+      <span class="text-muted small">{{ page_obj.paginator.count }} user(s)</span>
+    </div>
+    <div class="table-wrap">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Name</th><th>Email</th><th>ID</th><th>Role</th>
+            <th>Department</th><th>Status</th><th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for account in page_obj %}
+            <tr>
+              <td class="fw-semibold">{{ account.get_full_name }}</td>
+              <td class="small">{{ account.email }}</td>
+              <td class="small">{{ account.identifier|default:"-" }}</td>
+              <td><span class="badge bg-light text-dark border">{{ account.get_role_display }}</span></td>
+              <td class="small">{{ account.department.name|default:"-" }}</td>
+              <td>
+                {% if account.is_active %}
+                  <span class="badge bg-success">Active</span>
+                {% else %}
+                  <span class="badge bg-secondary">Deactivated</span>
+                {% endif %}
+              </td>
+              <td class="text-end text-nowrap">
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="{% url 'dashboards:user_edit' account.pk %}">Edit</a>
+                {% if account.pk != user.pk %}
+                  <form method="post" action="{% url 'dashboards:user_toggle' account.pk %}"
+                        class="d-inline"
+                        onsubmit="return confirm('{% if account.is_active %}Deactivate{% else %}Reactivate{% endif %} {{ account.get_full_name|escapejs }}?');">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="btn btn-sm {% if account.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                      {% if account.is_active %}Deactivate{% else %}Activate{% endif %}
+                    </button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7" class="text-center text-muted py-4">No users found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="p-3 border-top">
+        <ul class="pagination pagination-sm mb-0 justify-content-center">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}{{ querystring }}">Previous</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+          {% endif %}
+          <li class="page-item disabled">
+            <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+          </li>
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}{{ querystring }}">Next</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  </div>
+{% endblock %}

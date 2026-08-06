@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Activity log{% endblock %}
+
+{% block content %}
+  <div class="mb-3">
+    <h1 class="h4 mb-1">System activity log</h1>
+    <p class="text-muted small mb-0">
+      Append-only audit trail: logins, complaint status changes, unmasking,
+      user management and every blocked access attempt.
+    </p>
+  </div>
+
+  <div class="panel mb-4">
+    <div class="panel-body">
+      <form method="get" class="row g-2 align-items-end">
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="q">Search</label>
+          <input type="search" class="form-control" id="q" name="q" value="{{ q }}"
+                 placeholder="Actor, target or detail" />
+        </div>
+        <div class="col-8 col-md-4">
+          <label class="form-label" for="action">Action</label>
+          <select class="form-select" id="action" name="action">
+            <option value="">All actions</option>
+            {% for value, label in actions %}
+              <option value="{{ value }}"{% if action == value %} selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-4 col-md-2 d-grid">
+          <button type="submit" class="btn btn-outline-secondary">Filter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="panel mb-4">
+    <div class="panel-heading">
+      <span>Audit entries</span>
+      <span class="text-muted small">{{ page_obj.paginator.count }} entry(s)</span>
+    </div>
+    <div class="table-wrap">
+      <table class="table table-sm mb-0 align-middle">
+        <thead>
+          <tr><th>Timestamp</th><th>Actor</th><th>Action</th><th>Target</th><th>Detail</th><th>IP</th></tr>
+        </thead>
+        <tbody>
+          {% for entry in page_obj %}
+            <tr>
+              <td class="text-nowrap small">{{ entry.timestamp|date:"d M Y H:i:s" }}</td>
+              <td class="small">{{ entry.actor_label }}</td>
+              <td><span class="badge bg-light text-dark border">{{ entry.get_action_display }}</span></td>
+              <td class="small">{{ entry.target|default:"-" }}</td>
+              <td class="small text-muted">{{ entry.detail|truncatechars:90 }}</td>
+              <td class="small text-muted">{{ entry.ip_address|default:"-" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" class="text-center text-muted py-4">No audit entries recorded.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="p-3 border-top">
+        <ul class="pagination pagination-sm mb-0 justify-content-center">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}{{ querystring }}">Previous</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+          {% endif %}
+          <li class="page-item disabled">
+            <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+          </li>
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}{{ querystring }}">Next</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  </div>
+
+  <div class="panel">
+    <div class="panel-heading">Recent email notifications</div>
+    <div class="table-wrap">
+      <table class="table table-sm mb-0 align-middle">
+        <thead>
+          <tr><th>Created</th><th>Recipient</th><th>Subject</th><th>Status</th><th>Error</th></tr>
+        </thead>
+        <tbody>
+          {% for notification in notifications %}
+            <tr>
+              <td class="text-nowrap small">{{ notification.created_at|date:"d M Y H:i" }}</td>
+              <td class="small">{{ notification.recipient_email }}</td>
+              <td class="small">{{ notification.subject|truncatechars:60 }}</td>
+              <td>
+                <span class="badge {% if notification.status == 'SENT' %}bg-success{% elif notification.status == 'FAILED' %}bg-danger{% else %}bg-secondary{% endif %}">
+                  {{ notification.get_status_display }}
+                </span>
+              </td>
+              <td class="small text-muted">{{ notification.error|truncatechars:60|default:"-" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5" class="text-center text-muted py-4">No notifications sent yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

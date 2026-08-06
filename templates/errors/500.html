@@ -1,0 +1,24 @@
+{% load static %}<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Server error</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/portal.css' %}" />
+  </head>
+  <body>
+    {# Rendered without a request context: nothing here may depend on context processors. #}
+    <main class="error-shell">
+      <div>
+        <div class="error-code">500</div>
+        <h1 class="h4 mt-2">Something went wrong</h1>
+        <p class="text-muted">
+          An unexpected error occurred and has been logged for investigation.
+          Your data has not been lost - please try again in a moment.
+        </p>
+        <a class="btn btn-maroon mt-2" href="/">Back to the portal</a>
+      </div>
+    </main>
+  </body>
+</html>

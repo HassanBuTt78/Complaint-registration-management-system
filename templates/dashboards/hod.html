@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load complaint_extras %}
+{% block title %}Department dashboard{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1">{{ department.name }}</h1>
+      <p class="text-muted small mb-0">
+        You can only see and manage complaints filed against your own department.
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="{% url 'dashboards:analytics' %}">Analytics</a>
+      <a class="btn btn-maroon" href="{% url 'dashboards:reports' %}">Reports</a>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-value">{{ total }}</div>
+        <div class="stat-label">Department complaints</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-value">{{ unassigned }}</div>
+        <div class="stat-label">Awaiting assignment</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-value">{{ counts|status_count:"IN_PROGRESS" }}</div>
+        <div class="stat-label">In progress</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-value">{{ anonymous_count }}</div>
+        <div class="stat-label">Anonymous</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel mb-4">
+    <div class="panel-body">
+      {% include "partials/filter_bar.html" with show_export=False %}
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-heading">
+      <span>Complaints</span>
+      <span class="text-muted small">{{ page_obj.paginator.count }} record(s)</span>
+    </div>
+    {% include "partials/complaint_table.html" with show_department=False show_complainant=True empty_message="No complaints match the current filters." %}
+  </div>
+{% endblock %}

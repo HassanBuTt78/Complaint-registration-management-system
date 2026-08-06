@@ -1,0 +1,50 @@
+{% load complaint_extras %}{% comment %}Shared filter/search bar for the dashboards and report screens (UC13).{% endcomment %}
+<form method="get" class="row g-2 align-items-end">
+  <div class="col-12 col-lg-4">
+    <label class="form-label" for="{{ filter_form.q.id_for_label }}">{{ filter_form.q.label }}</label>
+    {{ filter_form.q }}
+  </div>
+  <div class="col-6 col-md-3 col-lg-2">
+    <label class="form-label" for="{{ filter_form.status.id_for_label }}">{{ filter_form.status.label }}</label>
+    {{ filter_form.status }}
+  </div>
+  <div class="col-6 col-md-3 col-lg-2">
+    <label class="form-label" for="{{ filter_form.category.id_for_label }}">{{ filter_form.category.label }}</label>
+    {{ filter_form.category }}
+  </div>
+  {% if filter_form.department %}
+    <div class="col-6 col-md-3 col-lg-2">
+      <label class="form-label" for="{{ filter_form.department.id_for_label }}">{{ filter_form.department.label }}</label>
+      {{ filter_form.department }}
+    </div>
+  {% endif %}
+  <div class="col-6 col-md-3 col-lg-2">
+    <label class="form-label" for="{{ filter_form.date_from.id_for_label }}">{{ filter_form.date_from.label }}</label>
+    {{ filter_form.date_from }}
+  </div>
+  <div class="col-6 col-md-3 col-lg-2">
+    <label class="form-label" for="{{ filter_form.date_to.id_for_label }}">{{ filter_form.date_to.label }}</label>
+    {{ filter_form.date_to }}
+  </div>
+  <div class="col-6 col-md-3 col-lg-2">
+    <label class="form-label" for="{{ filter_form.sort.id_for_label }}">{{ filter_form.sort.label }}</label>
+    {{ filter_form.sort }}
+  </div>
+  <div class="col-12 col-lg-auto d-flex gap-2">
+    <button type="submit" class="btn btn-maroon">Apply</button>
+    <a class="btn btn-outline-secondary" href="{{ request.path }}">Reset</a>
+    {% if show_export %}
+      <a class="btn btn-outline-success"
+         href="{% querystring_replace request export='csv' %}">CSV</a>
+      <a class="btn btn-outline-danger"
+         href="{% querystring_replace request export='pdf' %}">PDF</a>
+    {% endif %}
+  </div>
+  {% if filter_form.non_field_errors or filter_form.date_to.errors %}
+    <div class="col-12">
+      <div class="alert alert-warning py-2 mb-0 mt-2">
+        {{ filter_form.non_field_errors }}{{ filter_form.date_to.errors }}
+      </div>
+    </div>
+  {% endif %}
+</form>

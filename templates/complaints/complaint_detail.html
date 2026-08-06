@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}{{ complaint.reference }}{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1">{{ complaint.subject }}</h1>
+      <div class="text-muted small">
+        <span class="reference-cell">{{ complaint.reference }}</span>
+        &middot; {{ complaint.get_category_display }}
+        &middot; {{ complaint.department.name }}
+        &middot; submitted {{ complaint.created_at|date:"d M Y, H:i" }}
+      </div>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+      <span class="badge {{ complaint.status_badge_class }} fs-6">{{ complaint.get_status_display }}</span>
+      {% if can_edit %}
+        <a class="btn btn-sm btn-outline-secondary"
+           href="{% url 'complaints:edit' complaint.pk %}">Edit</a>
+      {% endif %}
+      {% if can_cancel %}
+        <form method="post" action="{% url 'complaints:cancel' complaint.pk %}"
+              onsubmit="return confirm('Cancel this complaint? This cannot be undone.');">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-outline-danger">Cancel complaint</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- ------------------------------------------------------- left column -->
+    <div class="col-lg-8">
+      <div class="panel mb-4">
+        <div class="panel-heading">Complaint details</div>
+        <div class="panel-body">
+          <p class="mb-4" style="white-space: pre-wrap;">{{ complaint.description }}</p>
+
+          <h2 class="h6 text-muted text-uppercase">Attachments</h2>
+          {% if attachments %}
+            <ul class="list-group list-group-flush small mb-0">
+              {% for attachment in attachments %}
+                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                  <a href="{% url 'complaints:attachment' attachment.pk %}">{{ attachment }}</a>
+                  <span class="text-muted">{{ attachment.size_display }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted small mb-0">No attachments were uploaded.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="panel mb-4">
+        <div class="panel-heading">Progress timeline</div>
+        <div class="panel-body">
+          <ul class="timeline">
+            {% for event in timeline %}
+              <li class="timeline-item is-{{ event.kind }}">
+                <div class="timeline-title">{{ event.title }}</div>
+                <div class="timeline-meta">
+                  {{ event.timestamp|date:"d M Y, H:i" }} &middot; {{ event.author }}
+                </div>
+                {% if event.body %}<div class="timeline-body">{{ event.body }}</div>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">Add a remark</div>
+        <div class="panel-body">
+          <form method="post" action="{% url 'complaints:remark' complaint.pk %}" novalidate>
+            {% csrf_token %}
+            {% include "partials/field.html" with field=remark_form.text %}
+            {% if remark_form.is_internal %}
+              {% include "partials/field.html" with field=remark_form.is_internal %}
+            {% endif %}
+            <button type="submit" class="btn btn-maroon">Post remark</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------------------ right column -->
+    <div class="col-lg-4">
+      <div class="panel mb-4">
+        <div class="panel-heading">Complainant</div>
+        <div class="panel-body">
+          {% if complaint.is_anonymous and not identity_visible %}
+            <p class="mb-2"><span class="anon-chip">Anonymous complaint</span></p>
+            <p class="small text-muted mb-0">
+              The complainant's identity is hidden throughout the portal.
+              {% if can_unmask %}
+                As Principal you may reveal it - the action will be logged.
+              {% endif %}
+            </p>
+            {% if can_unmask %}
+              <a class="btn btn-sm btn-outline-danger mt-3"
+                 href="{% url 'dashboards:unmask' complaint.pk %}">Unmask identity</a>
+            {% endif %}
+          {% else %}
+            <dl class="row mb-0 small">
+              <dt class="col-5 text-muted fw-normal">Name</dt>
+              <dd class="col-7">{{ complainant_name }}</dd>
+              <dt class="col-5 text-muted fw-normal">ID</dt>
+              <dd class="col-7">{{ complainant_id }}</dd>
+            </dl>
+            {% if complaint.is_anonymous %}
+              <p class="small text-muted mt-2 mb-0">
+                Filed anonymously - departmental staff cannot see these details.
+              </p>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="panel mb-4">
+        <div class="panel-heading">Handling</div>
+        <div class="panel-body">
+          <dl class="row mb-0 small">
+            <dt class="col-5 text-muted fw-normal">Department</dt>
+            <dd class="col-7">{{ complaint.department.name }}</dd>
+            <dt class="col-5 text-muted fw-normal">Assigned to</dt>
+            <dd class="col-7">
+              {% if complaint.assigned_to %}{{ complaint.assigned_to.get_full_name }}{% else %}<span class="text-muted">Not assigned</span>{% endif %}
+            </dd>
+            <dt class="col-5 text-muted fw-normal">Last updated</dt>
+            <dd class="col-7">{{ complaint.updated_at|date:"d M Y, H:i" }}</dd>
+            {% if complaint.resolved_at %}
+              <dt class="col-5 text-muted fw-normal">Resolved in</dt>
+              <dd class="col-7">{{ complaint.resolution_hours }} hours</dd>
+            {% endif %}
+          </dl>
+        </div>
+      </div>
+
+      {% if can_manage %}
+        <div class="panel mb-4">
+          <div class="panel-heading">Update status</div>
+          <div class="panel-body">
+            {% if complaint.allowed_next_statuses %}
+              <form method="post" action="{% url 'complaints:status' complaint.pk %}" novalidate>
+                {% csrf_token %}
+                {% include "partials/field.html" with field=status_form.status %}
+                {% include "partials/field.html" with field=status_form.note %}
+                <button type="submit" class="btn btn-maroon w-100">Apply status change</button>
+              </form>
+            {% else %}
+              <p class="small text-muted mb-0">
+                This complaint is in a final state ({{ complaint.get_status_display }});
+                no further transitions are permitted.
+              </p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-heading">Assign</div>
+          <div class="panel-body">
+            <form method="post" action="{% url 'complaints:assign' complaint.pk %}" novalidate>
+              {% csrf_token %}
+              {% include "partials/field.html" with field=assign_form.assigned_to %}
+              {% include "partials/field.html" with field=assign_form.note %}
+              <button type="submit" class="btn btn-outline-secondary w-100">Assign complaint</button>
+            </form>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

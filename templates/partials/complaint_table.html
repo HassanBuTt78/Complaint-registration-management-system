@@ -1,0 +1,85 @@
+{% load complaint_extras %}{% comment %}
+Shared complaint table.
+
+The complainant column always renders through `complainant_for`, which delegates
+to `Complaint.complainant_display(user)` - so anonymity holds no matter which
+dashboard includes this partial.
+{% endcomment %}
+<div class="table-wrap">
+  <table class="table table-hover align-middle mb-0">
+    <thead>
+      <tr>
+        <th scope="col">Reference</th>
+        <th scope="col">Subject</th>
+        <th scope="col">Category</th>
+        {% if show_department %}<th scope="col">Department</th>{% endif %}
+        {% if show_complainant %}<th scope="col">Complainant</th>{% endif %}
+        <th scope="col">Status</th>
+        <th scope="col">Submitted</th>
+        <th scope="col" class="text-end">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for complaint in page_obj %}
+        <tr>
+          <td class="reference-cell">{{ complaint.reference }}</td>
+          <td>
+            <a class="text-decoration-none fw-semibold"
+               href="{% url 'complaints:detail' complaint.pk %}">{{ complaint.subject|truncatechars:58 }}</a>
+          </td>
+          <td class="text-nowrap">{{ complaint.get_category_display }}</td>
+          {% if show_department %}<td>{{ complaint.department.name }}</td>{% endif %}
+          {% if show_complainant %}
+            <td>
+              {% if complaint|identity_visible:user %}
+                {{ complaint|complainant_for:user }}
+              {% else %}
+                <span class="anon-chip">Anonymous</span>
+              {% endif %}
+            </td>
+          {% endif %}
+          <td>
+            <span class="badge {{ complaint.status_badge_class }}">{{ complaint.get_status_display }}</span>
+          </td>
+          <td class="text-nowrap small">{{ complaint.created_at|date:"d M Y" }}</td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-secondary"
+               href="{% url 'complaints:detail' complaint.pk %}">Open</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="9" class="text-center text-muted py-4">
+            {{ empty_message|default:"No complaints found." }}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if page_obj.paginator.num_pages > 1 %}
+  <nav class="p-3 border-top" aria-label="Complaint pages">
+    <ul class="pagination pagination-sm mb-0 justify-content-center">
+      {# `previous_page_number`/`next_page_number` raise EmptyPage at the edges,
+         so they are only ever evaluated inside these guards. #}
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}{{ querystring }}">Previous</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+      {% endif %}
+      <li class="page-item disabled">
+        <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+      </li>
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}{{ querystring }}">Next</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endif %}

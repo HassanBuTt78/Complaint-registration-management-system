@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Departments{% endblock %}
+
+{% block content %}
+  <div class="mb-3">
+    <h1 class="h4 mb-1">Departments</h1>
+    <p class="text-muted small mb-0">Departments define the routing and access boundaries for complaints.</p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="panel">
+        <div class="panel-heading">
+          <span>Existing departments</span>
+          <span class="text-muted small">{{ departments|length }} record(s)</span>
+        </div>
+        <div class="table-wrap">
+          <table class="table mb-0 align-middle">
+            <thead>
+              <tr>
+                <th>Name</th><th>Code</th><th class="text-end">Members</th>
+                <th class="text-end">Complaints</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for department in departments %}
+                <tr>
+                  <td class="fw-semibold">{{ department.name }}</td>
+                  <td><code>{{ department.code }}</code></td>
+                  <td class="text-end">{{ department.member_count }}</td>
+                  <td class="text-end">{{ department.complaint_count }}</td>
+                  <td>
+                    {% if department.is_active %}
+                      <span class="badge bg-success">Active</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Inactive</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="5" class="text-center text-muted py-4">No departments defined yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="panel">
+        <div class="panel-heading">Add a department</div>
+        <div class="panel-body">
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {% include "partials/field.html" with field=form.name %}
+            {% include "partials/field.html" with field=form.code %}
+            {% include "partials/field.html" with field=form.description %}
+            {% include "partials/field.html" with field=form.is_active %}
+            <button type="submit" class="btn btn-maroon">Save department</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

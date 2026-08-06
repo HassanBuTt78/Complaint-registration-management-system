@@ -1,0 +1,26 @@
+[run]
+source = accounts,complaints,dashboards,notifications,config
+branch = True
+omit =
+    */migrations/*
+    */tests/*
+    */__pycache__/*
+    config/wsgi.py
+    config/asgi.py
+    manage.py
+# The dev/prod settings modules are environment configuration, not logic: the
+# suite runs under config.settings.test, so they can never be exercised here.
+# They are validated instead by `manage.py check --deploy --settings=...`.
+    config/settings/dev.py
+    config/settings/prod.py
+
+[report]
+show_missing = True
+skip_covered = False
+precision = 1
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Analytics{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1">Analytics</h1>
+      <p class="text-muted small mb-0">Scope: {{ scope }}</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="{% url 'dashboards:reports' %}">Export reports</a>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-value">{{ total }}</div>
+        <div class="stat-label">Total complaints</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-value">{{ resolved_total }}</div>
+        <div class="stat-label">Resolved / closed</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-value">{{ resolution_rate }}%</div>
+        <div class="stat-label">Resolution rate</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-value">{{ avg_resolution_hours }}</div>
+        <div class="stat-label">Avg. resolution (hours)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="panel">
+        <div class="panel-heading">Complaints per department</div>
+        <div class="panel-body">
+          <div class="chart-box"><canvas id="chart-department" aria-label="Complaints per department"></canvas></div>
+          {% if not per_department %}<p class="text-muted small mb-0">No data yet.</p>{% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="panel">
+        <div class="panel-heading">Complaints by status</div>
+        <div class="panel-body">
+          <div class="chart-box"><canvas id="chart-status" aria-label="Complaints by status"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="panel">
+        <div class="panel-heading">Complaints by category</div>
+        <div class="panel-body">
+          <div class="chart-box"><canvas id="chart-category" aria-label="Complaints by category"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="panel">
+        <div class="panel-heading">Monthly trend (last 12 months)</div>
+        <div class="panel-body">
+          <div class="chart-box"><canvas id="chart-monthly" aria-label="Monthly complaint trend"></canvas></div>
+          {% if not monthly_trend %}<p class="text-muted small mb-0">No data yet.</p>{% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="panel">
+        <div class="panel-heading">Status breakdown</div>
+        <div class="table-wrap">
+          <table class="table mb-0">
+            <thead>
+              <tr><th>Status</th><th class="text-end">Complaints</th></tr>
+            </thead>
+            <tbody>
+              {% for row in per_status %}
+                <tr><td>{{ row.status }}</td><td class="text-end">{{ row.total }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{ per_department|json_script:"chart-department-data" }}
+  {{ per_status|json_script:"chart-status-data" }}
+  {{ per_category|json_script:"chart-category-data" }}
+  {{ monthly_trend|json_script:"chart-monthly-data" }}
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'js/chart.umd.min.js' %}"></script>
+  <script src="{% static 'js/charts.js' %}"></script>
+{% endblock %}

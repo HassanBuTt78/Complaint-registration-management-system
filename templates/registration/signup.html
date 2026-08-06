@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Create an account{% endblock %}
+{% block main_class %}auth-shell{% endblock %}
+
+{% block content %}
+  <div class="auth-card auth-card--wide">
+    <h1 class="auth-title">{{ INSTITUTION_NAME }}</h1>
+    <p class="auth-subtitle">Create a student account</p>
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger py-2">
+        {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-6">{% include "partials/field.html" with field=form.full_name %}</div>
+        <div class="col-md-6">{% include "partials/field.html" with field=form.email %}</div>
+        <div class="col-md-6">{% include "partials/field.html" with field=form.identifier %}</div>
+        <div class="col-md-6">{% include "partials/field.html" with field=form.phone %}</div>
+        <div class="col-md-6">{% include "partials/field.html" with field=form.department %}</div>
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label class="form-label">Role</label>
+            <input type="text" class="form-control" value="Student" readonly disabled />
+            <span class="helptext">
+              HOD and Administrator accounts are created by the Principal only.
+            </span>
+          </div>
+        </div>
+        <div class="col-md-6">{% include "partials/field.html" with field=form.password1 %}</div>
+        <div class="col-md-6">{% include "partials/field.html" with field=form.password2 %}</div>
+      </div>
+
+      {% include "partials/field.html" with field=form.accept_terms %}
+
+      <button type="submit" class="btn btn-maroon w-100 py-2 fw-semibold">Register</button>
+    </form>
+
+    <p class="text-center small text-muted mt-3 mb-0">
+      Already have an account? <a href="{% url 'accounts:login' %}">Login here</a>.
+    </p>
+  </div>
+{% endblock %}

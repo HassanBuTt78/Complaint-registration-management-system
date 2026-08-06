@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Unmask complaint{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+      <div class="panel">
+        <div class="panel-heading text-danger">Reveal anonymous complainant</div>
+        <div class="panel-body">
+          <div class="alert alert-warning">
+            <strong>This action is recorded.</strong> Revealing an anonymous
+            complainant writes a permanent entry to the audit log naming you,
+            the complaint and the reason you give below. Departmental staff will
+            still never see the identity.
+          </div>
+
+          <dl class="row small">
+            <dt class="col-4 text-muted fw-normal">Reference</dt>
+            <dd class="col-8 reference-cell">{{ complaint.reference }}</dd>
+            <dt class="col-4 text-muted fw-normal">Subject</dt>
+            <dd class="col-8">{{ complaint.subject }}</dd>
+            <dt class="col-4 text-muted fw-normal">Department</dt>
+            <dd class="col-8">{{ complaint.department.name }}</dd>
+            <dt class="col-4 text-muted fw-normal">Status</dt>
+            <dd class="col-8">{{ complaint.get_status_display }}</dd>
+          </dl>
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label" for="reason">
+                Reason for unmasking <span class="text-danger">*</span>
+              </label>
+              <textarea class="form-control" id="reason" name="reason" rows="3"
+                        placeholder="e.g. Formal disciplinary investigation ref. 2026/17" required></textarea>
+              <span class="helptext">At least 5 characters. This text is stored in the audit log.</span>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-danger">Confirm and reveal identity</button>
+              <a class="btn btn-outline-secondary" href="{% url 'complaints:detail' complaint.pk %}">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

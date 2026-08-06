@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Not found{% endblock %}
+
+{% block content %}
+  <div class="error-shell">
+    <div>
+      <div class="error-code">404</div>
+      <h1 class="h4 mt-2">Page not found</h1>
+      <p class="text-muted">
+        The page or complaint you requested does not exist, or is outside your access scope.
+      </p>
+      <a class="btn btn-maroon mt-2" href="{% url 'dashboards:home' %}">Back to my dashboard</a>
+    </div>
+  </div>
+{% endblock %}

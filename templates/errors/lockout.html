@@ -1,0 +1,24 @@
+{% load static %}<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Account temporarily locked</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/portal.css' %}" />
+  </head>
+  <body>
+    <main class="auth-shell">
+      <div class="auth-card text-center">
+        <div class="error-code" style="font-size:3rem;">Locked</div>
+        <h1 class="h5 mt-2">Too many failed sign-in attempts</h1>
+        <p class="text-muted small">
+          For your protection this account and IP address have been temporarily
+          locked. Please wait a few minutes before trying again, or contact the
+          administrator if you have forgotten your password.
+        </p>
+        <a class="btn btn-maroon mt-2" href="/accounts/login/">Back to sign in</a>
+      </div>
+    </main>
+  </body>
+</html>

@@ -28,6 +28,9 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY . .
 
+# Git on Windows does not always preserve the execute bit, so set it here.
+RUN sed -i 's/\r$//' entrypoint.sh && chmod +x entrypoint.sh
+
 # Run as an unprivileged user and give it ownership of the writable paths.
 RUN useradd --create-home --shell /usr/sbin/nologin portal \
     && mkdir -p /app/media /app/staticfiles /app/logs \

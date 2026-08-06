@@ -65,6 +65,12 @@ no cost. Nothing in the codebase depends on either.
 
 ## Quick start
 
+> **New to the project, or setting it up on a fresh machine?**
+> [**HOW_TO_RUN.md**](HOW_TO_RUN.md) is a step-by-step guide written for someone
+> who has never used Django — installing Python, starting the portal, signing
+> in, running it offline, sharing it on the LAN, and fixing the common errors.
+> The rest of this README is the technical reference.
+
 ### Easiest: one-click launcher
 
 **Windows** — double-click **`run.bat`**.

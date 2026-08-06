@@ -27,7 +27,8 @@ Supervised by Prof. Haseeb Azmat.
 11. [Requirements traceability (FR-1 … FR-12)](#requirements-traceability)
 12. [Algorithm traceability (Chapter 4)](#algorithm-traceability)
 13. [Test-case traceability (Chapter 5)](#test-case-traceability)
-14. [Deviations from the FYP report](#deviations-from-the-fyp-report)
+14. [Known limitations](#known-limitations)
+15. [Deviations from the FYP report](#deviations-from-the-fyp-report)
 
 ---
 

@@ -1,0 +1,24 @@
+# Keep the serverless bundle small and free of local artefacts.
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+db.sqlite3
+media/
+logs/
+staticfiles/
+vendor/
+htmlcov/
+.coverage
+.coveragerc
+tests/
+Dockerfile
+docker-compose.yml
+entrypoint.sh
+run.bat
+run.sh
+*.md
+!DEPLOY_VERCEL.md
+.git/
+.gitignore
+.env

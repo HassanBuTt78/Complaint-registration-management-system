@@ -5,6 +5,7 @@ All secrets and environment-specific values are read from the environment
 (optionally populated from a ``.env`` file). See ``.env.example``.
 """
 
+import os
 from pathlib import Path
 
 import environ
@@ -97,9 +98,23 @@ WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
 # --------------------------------------------------------------------------
-# Database - SQLite by default, MySQL 8 by flipping DB_ENGINE=mysql in .env
+# Database
+#
+# Precedence:
+#   1. DATABASE_URL  - a single connection string (Postgres on Neon/Supabase,
+#      and what hosted platforms inject). Setting it locally also lets you run
+#      `migrate` and `seed_demo_data` against the deployed database.
+#   2. DB_ENGINE=mysql - discrete MySQL 8 settings.
+#   3. SQLite - the zero-configuration default.
 # --------------------------------------------------------------------------
-if env("DB_ENGINE") == "mysql":
+DATABASE_URL = env("DATABASE_URL", default="") or env("POSTGRES_URL", default="")
+
+if DATABASE_URL:
+    DATABASES = {"default": env.db_url_config(DATABASE_URL)}
+    DATABASES["default"].setdefault("OPTIONS", {})
+    if DATABASES["default"].get("ENGINE", "").endswith("postgresql"):
+        DATABASES["default"]["OPTIONS"].setdefault("sslmode", "require")
+elif env("DB_ENGINE") == "mysql":
     # PyMySQL is a pure-python driver: no compiler, no paid license, installs
     # everywhere. It registers itself as MySQLdb for Django's mysql backend.
     import pymysql
@@ -217,6 +232,11 @@ NOTIFICATIONS_ASYNC = env("NOTIFICATIONS_ASYNC")
 # --------------------------------------------------------------------------
 MAX_UPLOAD_SIZE_MB = env("MAX_UPLOAD_SIZE_MB")
 MAX_UPLOAD_SIZE = MAX_UPLOAD_SIZE_MB * 1024 * 1024
+
+# Store attachment bytes in the database instead of on disk. Required on hosts
+# with a read-only or ephemeral filesystem (Vercel and similar). See
+# complaints/storage.py.
+USE_DATABASE_FILE_STORAGE = env.bool("USE_DATABASE_FILE_STORAGE", default=False)
 ALLOWED_UPLOAD_EXTENSIONS = ["pdf", "jpg", "jpeg", "png"]
 ALLOWED_UPLOAD_CONTENT_TYPES = [
     "application/pdf",
@@ -239,7 +259,18 @@ PORTAL_SHORT_NAME = "OCR Portal"
 # Logging - errors and audit trail land on disk, never crash the request
 # --------------------------------------------------------------------------
 LOG_DIR = BASE_DIR / "logs"
-LOG_DIR.mkdir(exist_ok=True)
+
+# Serverless hosts (Vercel and similar) mount the application directory
+# read-only, so creating the log directory - or writing to it - raises at import
+# time. Fall back to console-only logging instead of refusing to boot; those
+# platforms collect stdout anyway.
+try:
+    LOG_DIR.mkdir(exist_ok=True)
+    _log_to_file = os.access(LOG_DIR, os.W_OK)
+except OSError:
+    _log_to_file = False
+
+_log_handlers = ["console", "file"] if _log_to_file else ["console"]
 
 LOGGING = {
     "version": 1,
@@ -255,29 +286,35 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
-        "file": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": str(LOG_DIR / "application.log"),
-            "maxBytes": 5 * 1024 * 1024,
-            "backupCount": 3,
-            "formatter": "verbose",
-            "encoding": "utf-8",
-        },
+        **(
+            {
+                "file": {
+                    "class": "logging.handlers.RotatingFileHandler",
+                    "filename": str(LOG_DIR / "application.log"),
+                    "maxBytes": 5 * 1024 * 1024,
+                    "backupCount": 3,
+                    "formatter": "verbose",
+                    "encoding": "utf-8",
+                }
+            }
+            if _log_to_file
+            else {}
+        ),
     },
-    "root": {"handlers": ["console", "file"], "level": "INFO"},
+    "root": {"handlers": _log_handlers, "level": "INFO"},
     "loggers": {
         "django.request": {
-            "handlers": ["console", "file"],
+            "handlers": _log_handlers,
             "level": "ERROR",
             "propagate": False,
         },
         "notifications": {
-            "handlers": ["console", "file"],
+            "handlers": _log_handlers,
             "level": "INFO",
             "propagate": False,
         },
         "accounts.security": {
-            "handlers": ["console", "file"],
+            "handlers": _log_handlers,
             "level": "INFO",
             "propagate": False,
         },

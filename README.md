@@ -15,7 +15,7 @@ Supervised by Prof. Haseeb Azmat.
 ## Table of contents
 
 1. [Zero-cost guarantee](#zero-cost-guarantee)
-2. [Quick start](#quick-start) · [Offline install](#fully-offline-installation) · [Known limitations](#known-limitations)
+2. [Quick start](#quick-start) · [Offline install](#fully-offline-installation) · [Deploy to Vercel](DEPLOY_VERCEL.md) · [Known limitations](#known-limitations)
 3. [Demo accounts](#demo-accounts)
 4. [Running the tests](#running-the-tests)
 5. [Docker](#docker)
@@ -69,6 +69,11 @@ no cost. Nothing in the codebase depends on either.
 > [**HOW_TO_RUN.md**](HOW_TO_RUN.md) is a step-by-step guide written for someone
 > who has never used Django — installing Python, starting the portal, signing
 > in, running it offline, sharing it on the LAN, and fixing the common errors.
+>
+> **Want a public URL?** [**DEPLOY_VERCEL.md**](DEPLOY_VERCEL.md) deploys the
+> portal to Vercel with a free Postgres database — no credit card, about 20
+> minutes.
+>
 > The rest of this README is the technical reference.
 
 ### Easiest: one-click launcher
@@ -540,7 +545,20 @@ should know about them rather than discover them.
    randomised names, and served only through a permission-checked view — but no
    antivirus engine inspects them. ClamAV is the free option if that matters.
 
-7. **SQLite is the default database.** Excellent for a demo and fine for a
+7. **On Vercel, attachments are stored in the database.** A serverless
+   filesystem is read-only, so `complaints/storage.py` keeps attachment bytes
+   in Postgres instead. Correct and free at the SRS's limits (5 MB per file,
+   5 files per complaint), but a large institution accumulating years of
+   uploads should move to object storage. Local and Docker deployments are
+   unaffected and still use the disk.
+
+8. **The live Vercel deployment is unverified.** Every part that can be checked
+   without an account is covered by `tests/test_deployment.py` (20 tests: the
+   WSGI entry point serves real requests, static files resolve, HTTPS redirect,
+   host rejection, security headers, and a loud failure when `DATABASE_URL` is
+   absent). Creating the Vercel and Neon accounts is yours to do.
+
+9. **SQLite is the default database.** Excellent for a demo and fine for a
    single college department, but it serialises writes. For heavy concurrent
    use switch `DB_ENGINE=mysql` (already supported and free).
 

@@ -11,7 +11,7 @@ django-axes==8.3.1        # MIT           - brute-force login protection
 whitenoise==6.12.0        # MIT           - static file serving without a CDN
 reportlab==5.0.0          # BSD-3-Clause  - PDF report generation
 PyMySQL==1.2.0            # MIT           - pure-python MySQL 8 driver (no compiler)
-psycopg[binary]==3.3.4    # LGPL-3.0      - PostgreSQL driver (Vercel / Neon / Supabase)
+Pillow==12.3.0            # MIT-CMU       - image handling for uploaded evidence
 gunicorn==26.0.0          # MIT           - WSGI server used inside the container
 
 # --- Development / QA (safe to install everywhere, not needed at runtime) ---

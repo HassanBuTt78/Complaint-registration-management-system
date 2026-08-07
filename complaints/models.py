@@ -21,10 +21,6 @@ from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Department, Role
 
-# Imported for its side effect of registering the StoredFile model with the
-# app registry, as well as for the storage selector itself.
-from .storage import AttachmentStorage, StoredFile  # noqa: F401
-
 ANONYMOUS_LABEL = _("Anonymous Complainant")
 
 
@@ -414,14 +410,7 @@ class ComplaintAttachment(models.Model):
     complaint = models.ForeignKey(
         Complaint, related_name="attachments", on_delete=models.CASCADE
     )
-    file = models.FileField(
-        _("file"),
-        upload_to=attachment_upload_path,
-        # Resolved at runtime: local disk in development, the database on
-        # serverless hosts where the filesystem is read-only. See
-        # complaints/storage.py.
-        storage=AttachmentStorage(),
-    )
+    file = models.FileField(_("file"), upload_to=attachment_upload_path)
     original_name = models.CharField(max_length=255, blank=True)
     content_type = models.CharField(max_length=100, blank=True)
     size_bytes = models.PositiveIntegerField(default=0)

@@ -1,4 +1,4 @@
-Dear {{ recipient_name }},
+{% autoescape off %}Dear {{ recipient_name }},
 
 {% if event == "submitted" %}Your complaint has been received and recorded.{% elif event == "assigned" %}Your complaint has been assigned for review.{% elif event == "status_changed" %}The status of your complaint has changed{% if previous_status %} from {{ previous_status }}{% endif %} to {{ status_label }}.{% elif event == "remark" %}A new update has been added to your complaint.{% else %}There is an update on your complaint.{% endif %}
 
@@ -19,3 +19,4 @@ Regards,
 
 --
 This is an automated message. Please do not reply to this email.
+{% endautoescape %}

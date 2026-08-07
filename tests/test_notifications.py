@@ -283,3 +283,50 @@ class AsyncDispatchTests(TestCase):
         with mock.patch("notifications.services.threading.Thread"):
             notification = notify_complaint_event(self.complaint, event="submitted")
         self.assertEqual(notification.status, DeliveryStatus.PENDING)
+
+
+class PlainTextEmailEscapingTests(CommitCallbackMixin, TestCase):
+    """
+    The plain-text email body must not be HTML-escaped.
+
+    Django autoescapes every template, including `.txt` ones. That turned the
+    institution name "Online Complaint Registration & Management System" into
+    "...&amp;..." in the message students actually receive, and would mangle any
+    subject containing & < > or a quote.
+    """
+
+    def setUp(self):
+        mail.outbox = []
+        self.department = make_department()
+        self.student = make_student(department=self.department)
+        self.complaint = make_complaint(
+            student=self.student, department=self.department
+        )
+
+    def _send(self, subject=None):
+        if subject is not None:
+            self.complaint.subject = subject
+            self.complaint.save(update_fields=["subject"])
+        notify_complaint_event(self.complaint, event="submitted")
+        return mail.outbox[-1]
+
+    def test_ampersand_is_not_escaped_in_the_plain_text_body(self):
+        body = self._send().body
+        self.assertNotIn("&amp;", body)
+        self.assertIn("Complaint Registration & Management System", body)
+
+    def test_special_characters_in_a_subject_survive_intact(self):
+        body = self._send('Fees & "late" charges <urgent>').body
+        self.assertIn('Fees & "late" charges <urgent>', body)
+        for entity in ("&amp;", "&quot;", "&lt;", "&gt;", "&#x27;"):
+            self.assertNotIn(entity, body)
+
+    def test_html_alternative_is_still_escaped(self):
+        """The HTML part must keep escaping - only the text part changes."""
+        message = self._send("Fees & charges")
+        html = next(
+            content
+            for content, mimetype in message.alternatives
+            if mimetype == "text/html"
+        )
+        self.assertIn("Fees &amp; charges", html)

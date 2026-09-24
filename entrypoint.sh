@@ -5,6 +5,9 @@
 # ---------------------------------------------------------------------------
 set -e
 
+mkdir -p /app/logs
+chmod 777 /app/logs   # or chown to whatever UID Render actually runs as
+
 if [ "${DB_ENGINE}" = "mysql" ]; then
   echo "Waiting for MySQL at ${DB_HOST:-127.0.0.1}:${DB_PORT:-3306} ..."
   attempts=0

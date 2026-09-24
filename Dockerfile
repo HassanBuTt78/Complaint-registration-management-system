@@ -38,7 +38,7 @@ RUN useradd --create-home --shell /usr/sbin/nologin portal \
 
 # Collect static assets at build time so the image is ready to serve.
 # A throwaway key is used because collectstatic must not need real secrets.
-RUN SECRET_KEY=build-time-only-not-used-at-runtime \
+RUN SECRET_KEY=k7xQ2mP9vL4wR8tY1nJ6sD3fH0aZ5bU7eC9gK2mN4pS6qV8xW1yT3rB5uF7jD9L \
     DJANGO_SETTINGS_MODULE=config.settings.prod \
     SECURE_SSL_REDIRECT=False \
     python manage.py collectstatic --noinput
